@@ -1,0 +1,10 @@
+import cv2
+ 
+img = cv2.imread('../python/TestDemoImgs/BacterialSpot1.jpg')
+
+
+#img will be BGR in contrast to RGB in matplotlib
+#RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#plt.imshow(RGB_img)
+#this converts to RGB channels
+

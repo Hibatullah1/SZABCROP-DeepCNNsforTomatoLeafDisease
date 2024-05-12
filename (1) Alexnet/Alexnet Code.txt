@@ -1,0 +1,77 @@
+import tensorflow
+import matplotlib.pyplot as plt
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+
+#Importing Dataset
+#65% training
+datagen = ImageDataGenerator(rescale=1/255)
+#25% test 10%validation
+datagen1 = ImageDataGenerator(rescale=1/255, validation_split=0.3)
+
+train = datagen.flow_from_directory(
+    '../input/dataset/train/',
+    target_size= (227,227),
+    batch_size=64,
+    seed=128, 
+    #subset='training'
+    )
+test = datagen1.flow_from_directory(
+    '../input/dataset/test',
+    target_size= (227,227),
+    batch_size=64,
+    seed=128, 
+    subset='training'
+    )
+val =  datagen1.flow_from_directory(
+    '../input/dataset/test', 
+    target_size= (227,227),
+    batch_size=1500,
+    seed=128, 
+    subset='validation'
+    )
+
+
+#Creating Model
+
+final_model = tensorflow.keras.models.Sequential([
+    tensorflow.keras.layers.Conv2D(filters=96, kernel_size=(11,11), strides=(4,4), activation='relu', input_shape=(227,227,3)),
+    tensorflow.keras.layers.BatchNormalization(),
+    tensorflow.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+    tensorflow.keras.layers.Conv2D(filters=256, kernel_size=(5,5), strides=(1,1), activation='relu', padding="same"),
+    tensorflow.keras.layers.BatchNormalization(),
+    tensorflow.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+    tensorflow.keras.layers.Conv2D(filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"),
+    tensorflow.keras.layers.BatchNormalization(),
+    tensorflow.keras.layers.Conv2D(filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"),
+    tensorflow.keras.layers.BatchNormalization(),
+    tensorflow.keras.layers.Conv2D(filters=256, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"),
+    tensorflow.keras.layers.BatchNormalization(),
+    tensorflow.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+    tensorflow.keras.layers.Flatten(),
+    tensorflow.keras.layers.Dense(4096, activation='relu'),
+    tensorflow.keras.layers.Dropout(0.5),
+    tensorflow.keras.layers.Dense(4096, activation='relu'),
+    tensorflow.keras.layers.Dropout(0.5),
+    tensorflow.keras.layers.Dense(10, activation='softmax')
+])
+
+final_model.compile(loss='categorical_crossentropy', optimizer=tensorflow.optimizers.SGD(lr=0.001), metrics=['accuracy'])
+final_model.summary()
+
+#Training Model
+
+class myCallback(tensorflow.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if(logs.get('accuracy')>0.999):
+            print("\nReached 99.9% accuracy so cancelling training!")
+            self.model.stop_training = True
+            
+callbacks = myCallback()
+
+history = final_model.fit_generator(
+            train,
+            epochs = 50,
+            validation_data = test,
+            callbacks=[callbacks]
+            )

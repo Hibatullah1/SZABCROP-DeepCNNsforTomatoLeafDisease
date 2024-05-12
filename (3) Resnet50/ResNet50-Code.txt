@@ -1,0 +1,75 @@
+
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.applications.resnet50 import preprocess_input
+import matplotlib.pyplot as plt
+
+#Importing Dataset
+#65% training
+datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+#25% test 10%validation
+datagen1 = ImageDataGenerator(validation_split=0.3, preprocessing_function=preprocess_input)
+
+train = datagen.flow_from_directory(
+    '../input/dataset/train/',
+    target_size= (224,224),
+    batch_size=64,
+    seed=128, 
+    #subset='training'
+    )
+test = datagen1.flow_from_directory(
+    '../input/dataset/test',
+    target_size= (224,224),
+    batch_size=64,
+    seed=128, 
+    subset='training'
+    )
+val =  datagen1.flow_from_directory(
+    '../input/dataset/test', 
+    target_size= (224,224),
+    batch_size=1500,
+    seed=1500, 
+    subset='validation'
+    )
+
+
+#Creating Model
+
+resnet_50 = Sequential()
+resnet_50.add(ResNet50(include_top=False, pooling='avg', weights=None))
+resnet_50.add(Dense(10, activation='softmax'))
+#resnet_50.layers[0].trainable = False 
+final_model=resnet_50
+
+steps_per_epoch_training = len(train)
+steps_per_epoch_validation = len(test)
+    
+final_model.summary()
+
+final_model.compile(optimizer='adam', 
+              loss='categorical_crossentropy', 
+              metrics=['accuracy']
+		)
+
+
+#Training Model
+class myCallback(tensorflow.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if(logs.get('accuracy')>0.999):
+            print("\nReached 99.9% accuracy so cancelling training!")
+            self.model.stop_training = True
+            
+callbacks = myCallback()
+
+history = final_model.fit_generator(
+            train,
+    steps_per_epoch=steps_per_epoch_training,
+    validation_steps=steps_per_epoch_validation,
+            epochs = 10,
+            validation_data = test,
+verbose=1,
+            callbacks=[callbacks]
+            )

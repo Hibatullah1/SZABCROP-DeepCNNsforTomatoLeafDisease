@@ -1,0 +1,71 @@
+
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.vgg16 import VGG16
+import matplotlib.pyplot as plt
+
+#Importing Dataset
+#65% training
+datagen = ImageDataGenerator(rescale=1/255)
+#25% test 10%validation
+datagen1 = ImageDataGenerator(rescale=1/255, validation_split=0.3)
+
+train = datagen.flow_from_directory(
+    '../input/dataset/train/',
+    target_size= (224,224),
+    seed=128, 
+    #subset='training'
+    )
+test = datagen1.flow_from_directory(
+    '../input/dataset/test',
+    target_size= (224,224),
+    seed=128, 
+    subset='training'
+    )
+val =  datagen1.flow_from_directory(
+    '../input/dataset/test', 
+    target_size= (224,224),
+    seed=128, 
+    subset='validation'
+    )
+
+
+#Creating Model
+image_size = [224, 224]
+vgg = VGG16(input_shape = image_size + [3], weights = 'imagenet', include_top =  False)
+
+for layer in vgg.layers:
+    layer.trainable = False
+    
+#Fully Connected Layers
+fc = Flatten()(vgg.output)
+fc = Dense(4096, activation='relu')(fc)
+fc = Dropout(0.3)(fc) 
+fc = Dense(4096, activation='relu')(fc)
+fc = Dropout(0.3)(fc)
+fc = Dense  (10, activation='softmax')(fc) 
+
+final_model = Model(vgg.input, fc)
+final_model.compile(optimizer = Adam(lr=0.001), 
+              loss = 'categorical_crossentropy', 
+              metrics = ['accuracy'])
+    
+final_model.summary()
+
+#Training Model
+class myCallback(tensorflow.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if(logs.get('accuracy')>0.999):
+            print("\nReached 99.9% accuracy so cancelling training!")
+            self.model.stop_training = True
+            
+callbacks = myCallback()
+
+history = final_model.fit_generator(
+            train,
+            epochs = 50,
+            validation_data = test,
+            callbacks=[callbacks]
+            )

@@ -1,0 +1,27 @@
+#For resnet50
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import numpy as np
+from tensorflow.keras.applications.resnet50 import preprocess_input
+
+
+directorypath='../xyz/'
+image_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
+imagegenerator = image_gen.flow_from_directory(str(directorypath),
+                                            target_size= (224,224),
+                                            batch_size=5000,
+                                            class_mode=None
+                                            )
+print("images loaded")
+
+
+x_validation= next(valgenerator)
+x_validation = np.array([np.reshape(i,(224,224,3)) for i in x_validation])
+x_validation = np.array([i.flatten() for i in x_validation])
+x_validation = x_validation.reshape(x_validation.shape[0],224,224,3)
+print("images processed")
+
+predictions = fyp_model.predict(x_validation)
+print("prediction successful")
+
+#forward predictions to name assigner

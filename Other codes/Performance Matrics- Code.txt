@@ -1,0 +1,31 @@
+x_validation, y_validation = next(val)
+x_validation = np.array([np.reshape(i,(224,224,3)) for i in x_validation])
+x_validation = np.array([i.flatten() for i in x_validation])
+x_validation = x_validation.reshape(x_validation.shape[0],224,224,3)
+
+predictions = final_model.predict(x_validation)
+
+from sklearn.metrics import accuracy_score
+acc_score= accuracy_score(y_validation, predictions.round())
+print('Accuracy Score : '+str(acc_score))
+
+from sklearn.metrics import classification_report
+print('Classification Report:')
+c_rep= classification_report(y_validation, predictions.round())
+print(c_rep)
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_validation.argmax(axis=1), predictions.round().argmax(axis=1))
+
+import matplotlib.pyplot as plt
+plt.plot(history.history['accuracy'],label='train')
+plt.plot(history.history['val_accuracy'],label='test')
+plt.title('VGG-16')
+plt.xlabel('Epochs')
+plt.ylabel("Accuracy")
+
+plt.plot(history.history['loss'],label='train')
+plt.plot(history.history['val_loss'],label='test')
+plt.title('VGG-16')
+plt.xlabel('Epochs')
+plt.ylabel("Loss")

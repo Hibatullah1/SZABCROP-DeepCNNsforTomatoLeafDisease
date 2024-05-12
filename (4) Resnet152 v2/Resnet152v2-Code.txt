@@ -1,0 +1,60 @@
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+
+#Importing Dataset
+#65% training
+datagen = ImageDataGenerator(rescale=1/255)
+#25% test 10%validation
+datagen1 = ImageDataGenerator(rescale=1/255, validation_split=0.3)
+
+train = datagen.flow_from_directory(
+    '../input/dataset/train/',
+    target_size= (256,256),
+    batch_size=64,
+    seed=128, 
+    #subset='training'
+    )
+test = datagen1.flow_from_directory(
+    '../input/dataset/test',
+    target_size= (256,256),
+    batch_size=64,
+    seed=128, 
+    subset='training'
+    )
+val =  datagen1.flow_from_directory(
+    '../input/dataset/test', 
+    target_size= (256,256),
+    batch_size=1500,
+    seed=128, 
+    subset='validation'
+    )
+
+
+#Model Creation
+from tensorflow import keras
+from tensorflow.keras.applications import ResNet152V2
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
+from tensorflow.keras.models import Model
+
+base_model = ResNet152V2(input_shape=(256,256,3), include_top=False)
+    
+for layers in base_model.layers[:140]:
+    layers.trainable = False
+for layers in base_model.layers[140:]:
+    layers.trainable = True
+        
+    
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(1000, activation='relu')(x)
+pred = Dense(10, activation='softmax')(x)
+    
+final_model = Model(inputs=base_model.input, outputs=pred)
+final_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics='accuracy')
+
+#Model Training
+history=final_model.fit(train, 
+                        batch_size=80, 
+                        epochs=10, 
+                        validation_data=val)
+

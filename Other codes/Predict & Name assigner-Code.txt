@@ -1,0 +1,27 @@
+#name assigner for single image prediction
+
+def name_assigner(inp):
+    name='none'
+    if inp[0]:
+        name='Bacterial spot'
+    elif inp[1]:
+        name='Early blight'
+    elif inp[2]:
+        name='Late Blight'
+    elif inp[3]:
+        name='Leaf Mold'
+    elif inp[4]:
+        name='Septoria Leaf Spot'
+    elif inp[5]:
+        name='Target Spot'
+    elif inp[6]:
+        name='Tomato Yellow Leaf Curl Virus'
+    elif inp[7]:
+        name='Tomato Mosaic Virus'
+    elif inp[8]:
+        name='Two Spotted Spider Mite'
+    elif inp[9]:
+        name='Healthy'        
+    return name
+
+#def name_assinger_multiple(pred):
