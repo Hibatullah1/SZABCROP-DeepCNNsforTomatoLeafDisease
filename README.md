@@ -1,5 +1,7 @@
 # SZABCROP-DeepCNNsforTomatoLeafDisease
 
+![preprocessed image](https://github.com/Hibatullah1/SZABCROP-DeepCNNsforTomatoLeafDisease/assets/109016139/e2e713ce-b260-4759-920e-31a0ee5b280d)
+
 SZABCROP is a Convolutional Neural Network (CNN) based project implementiong CNN models; 
 1. AlexNet 
 2. VGG-16
@@ -8,5 +10,6 @@ SZABCROP is a Convolutional Neural Network (CNN) based project implementiong CNN
 
 ![szabcrop](https://github.com/Hibatullah1/SZABCROP-DeepCNNsforTomatoLeafDisease/assets/109016139/1022fcf8-42af-41cc-834f-7095e5e345c5)
 
-In this project the deep learning techniques are applied for the task of image classification and recognition. These models are renowned for their effectiveness in extracting features from images through multiple layers of convolutional and pooling operations. AlexNet, VGG-16, ResNet50, and ResNet152V2 are widely used in the scientific community due to their proven performance in various computer vision task.
+Deep learning techniques are used in this project to help in the recognition and classification of tomato leaf images. These models are well known for their ability to extract features from images using several layers of pooling and convolutional processes. 
+
 
